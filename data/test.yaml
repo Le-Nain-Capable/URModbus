@@ -1,0 +1,13 @@
+version: 0
+name: Test
+tasks:
+    0:
+        name: Intermediate
+        requires: 
+    1:
+        name: Task 1
+        requires: 0
+    2: 
+        name: Task 2
+        requires: 1
+ordering: [1,2]

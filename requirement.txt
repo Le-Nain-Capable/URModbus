@@ -1,0 +1,3 @@
+pymodbus
+PyYAML
+numpy
