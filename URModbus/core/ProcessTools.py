@@ -87,6 +87,15 @@ class Process():
         """
         return self.__ordering
     
+    @property
+    def tasks(self)->list[int]:
+        """Returns a list of task ids
+
+        Returns:
+            list[int]: task ids
+        """
+        return [task.taskId for task in self.__tasks]
+    
     def get_task(self,task_id:int)->Task:
         """Allow to obtain a task
 

@@ -1,0 +1,12 @@
+name: Local Rag
+version: 0.0.1
+schema: v1
+mcpServers:
+  - name: mcp-local-rag
+    command: uvx
+    args:
+      - --python=3.10
+      - --from
+      - git+https://github.com/nkapila6/mcp-local-rag
+      - mcp-local-rag
+    env: {}

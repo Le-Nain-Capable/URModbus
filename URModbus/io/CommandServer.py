@@ -3,11 +3,11 @@
 class:
  - Terminal Server: TUI input server
 """
-from URModbus.config.constants import TERMINAL_HOST, TERMINAL_PORT, LOGO, DATA_DIR
+from URModbus.config.constants import Settings
 from URModbus.core.RobotController import RobotController
 from URModbus.core.ProcessTools import Process
 from URModbus.core.TimeTracker import TimeTracker
-from URModbus.io.DataParser import read_data_file
+from URModbus.io.DataParser import read_data_file,calculate_mean_time
 import os
 import socket
 import threading
@@ -23,7 +23,12 @@ class TerminalServer(threading.Thread):
      - __parse_command: Parse the command and call the callback function
      - __handle_command: Handle the command
     """
-    def __init__(self, controller:RobotController, tracker:TimeTracker, process:Process, host:str=TERMINAL_HOST, port:int=TERMINAL_PORT):
+    def __init__(self, 
+                 controller:RobotController, 
+                 tracker:TimeTracker,
+                 process:Process,
+                 host:str=Settings.TERMINAL_HOST, 
+                 port:int=Settings.TERMINAL_PORT):
         """Innstatiate the Terminal Server
 
         Args:
@@ -49,7 +54,7 @@ class TerminalServer(threading.Thread):
 
 
 
-        self.__logo = LOGO
+        self.__logo = Settings.LOGO
 
     
     def run(self):
@@ -169,12 +174,13 @@ class TerminalServer(threading.Thread):
                     "clear      -     clear task pile",
                     "help       -     display help",
                     "info       -     display info on a task",
-                    "load       -     load a new process file"
+                    "load       -     load a new process file",
                     "pause      -     pause the bot",
                     "play       -     resume the bot",
                     "process    -     get info on the running process",
                     "program    -     get program name",
                     "sequence   -     add a sequence to pile",
+                    "stats      -     displays statistics values"
                     "status     -     display bot status informations",
                     "stop       -     stop current task",
                     "Pro tip: use <command> -h to obtain specific help"]
@@ -226,7 +232,7 @@ class TerminalServer(threading.Thread):
             if ".yaml" not in file_name:
                 file_name = file_name + ".yaml"
             
-            if os.path.exists(f"./{DATA_DIR}/{file_name}"):
+            if os.path.exists(f"./{Settings.DATA_DIR}/{file_name}"):
                 data = read_data_file(file_name)
                 self.__controller.clear_task_pile()
                 self.__process.changeProcessFile(data)
@@ -310,11 +316,80 @@ class TerminalServer(threading.Thread):
             self.__controller.stop_program()
             return "Bot stopped"
         
+        elif cmd == "stats":
+            if "-h" in args:
+                text = ["This command allows you to obtain a stats report",
+                        "Usage: stats [options] [<task1> <task2> ...]",
+                        "Optional Parameters:",
+                        " <task>: if provided, outputs data for requested tasks; otherwise outputs for the current task",
+                        "Special Parameters:",
+                        " -full: display stats for the whole process",
+                        " -p:    display only general process info"]
+
+                return '\n'.join(text)
+
+            
+            f_flag = False
+            if "-full" in args:
+                f_flag = True
+                args.remove("-full")
+            
+            p_flag = False
+            if "-p" in args:
+                p_flag = True
+                args.remove("-p")
+
+            if p_flag and f_flag:
+                return "Can only use -p or -full but not both"
+        
+            if f_flag or p_flag: #Either the user want the full process or the process summary. So we need to fecth process data
+
+                tasks = self.__process.tasks
+            
+            elif len(args)>0: # Elswise we look if user request a specific task
+            
+                try:
+                    tasks = [int(task.strip()) for task in args]
+                except ValueError:
+                    return "Task id must be an integer"
+            
+                if not all(self.__process.isTaksInProcess(task) is True for task in tasks):
+                    return "One or more tasks are not in the process file"
+            else: #The user just want the current task
+                tasks = [self.__controller.get_current_task()] 
+            
+            L = [calculate_mean_time(self.__process.name,task) for task in tasks] #We get statistical data
+
+            text = []
+
+            if not p_flag: # If user didnt explicitly requested the process, we create task data
+
+                for i,task in enumerate(tasks):
+                    text += [f"Task {tasks[i]} - {self.__process.get_task(task).name}:",
+                            f"Mean: {L[i][0]}s",
+                            f"Deviation: {L[i][1]}s",
+                            f"Mean +/- Deviation: {L[i][2]}s",
+                            f"Last 100 Mean: {L[i][3]}s",
+                            "---------------------------"]
+                
+            if f_flag or p_flag: #If the user want a full report or a process one
+                sum_mean = sum([L[i][0] for i in range(len(L))])
+                sum_dev = sum([L[i][1] for i in range(len(L))])
+                text += [f"General Process data for {self.__process.name}",
+                         f"Mean process time: {round(sum_mean,2)}s",
+                         f"Best possible time: {round(sum_mean-sum_dev,2)}s",
+                         f"Worst possible time: {round(sum_mean+sum_dev,2)}s"]
+            
+            return '\n'.join(text)
+
+        
+        
         elif cmd == "status":
             if "-h" in args:
                 text = ["This command allows you to obtain a status report",
                         "Usage: status"]
-                return '\n'.join(text)
+                return '\n'.join(text)    
+
                 
             
             lenght = 69

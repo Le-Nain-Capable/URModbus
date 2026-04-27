@@ -1,5 +1,5 @@
 """
-This is the main module of MITCH code base.
+This is the main module of URModbus code base.
 To start the execution run main.py in the root folder
 
 List of modules: 

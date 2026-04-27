@@ -7,7 +7,7 @@ Functions:
     calculate_mean_time: Calculates statistical values for a process task file.
     
 """
-from URModbus.config.constants import DATA_DIR,AUTOGEN_DIR
+from URModbus.config.constants import Settings
 import yaml
 import os
 import numpy as np
@@ -22,7 +22,7 @@ def read_data_file(file:str)->dict:
         dict: the file data
     """
     # Open the YAML file for reading
-    with open(f"./{DATA_DIR}/{file}", 'r') as stream:
+    with open(f"./{Settings.DATA_DIR}/{file}", 'r') as stream:
         try:
             # Load the data from the YAML file into a Python dictionary
             data = yaml.safe_load(stream)
@@ -61,7 +61,7 @@ def write_task_time(process:str,task:int,dataID:float,time:float):
         time (float): time of the task
     """
     # Check if the directory exists
-    dir_path = f"./{AUTOGEN_DIR}/{process}"
+    dir_path = f"./{Settings.AUTOGEN_DIR}/{process}"
     if not os.path.exists(dir_path):
         # Create the directory
         os.makedirs(dir_path)
@@ -94,7 +94,7 @@ def calculate_mean_time(process:str,task:int)->list[float]:
 
     # Read the file
     try:
-        data = np.loadtxt(f"./{AUTOGEN_DIR}/{process}/{task}.txt", delimiter=';')
+        data = np.loadtxt(f"./{Settings.AUTOGEN_DIR}/{process}/{task}.txt", delimiter=';')
     except FileNotFoundError:
         return [0]*4
     

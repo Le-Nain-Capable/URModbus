@@ -1,5 +1,5 @@
 """
-This is the core module of MITCH code base.
+This is the core module of URModbus code base.
 Here are modules that interact with hardware
 
 List of modules: 

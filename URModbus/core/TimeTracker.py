@@ -5,7 +5,7 @@ class:
 """
 from URModbus.core.RobotController import RobotController
 from URModbus.core.ProcessTools import Process
-from URModbus.config.constants import ROBOT_SLEEP_TIME
+from URModbus.config.constants import Settings
 from URModbus.io.DataParser import write_task_time
 from threading import Thread, Lock
 from time import sleep,time
@@ -41,7 +41,7 @@ class TimeTracker(Thread):
         #This simple watcher will keep track of task times
 
         while self.__running: # Main loop 
-            sleep(ROBOT_SLEEP_TIME/5)
+            sleep(Settings.ROBOT_SLEEP_TIME/5)
             current_task = self.__controller.get_current_task()
 
             # IF there is a mismatch, then it means the task as changed.
@@ -57,7 +57,7 @@ class TimeTracker(Thread):
                     with mutex:
                         self.__end_time = time()
 
-                        t = self.__end_time-self.__start_time-self.__pause_time-(2*ROBOT_SLEEP_TIME)
+                        t = self.__end_time-self.__start_time-self.__pause_time-(2*Settings.ROBOT_SLEEP_TIME)
 
                         if t > 0 :
                             write_task_time(self.__process.name,
@@ -71,7 +71,7 @@ class TimeTracker(Thread):
             if "PLAYING" not in self.__controller.programState or self.__controller.isEmergencyStopped: 
                 #This simple thing will check if the robot is running or not and add sleeping time
                 with mutex:
-                    self.__pause_time += ROBOT_SLEEP_TIME/5
+                    self.__pause_time += Settings.ROBOT_SLEEP_TIME/5
  
     def stop(self):
         self.__running = False
@@ -79,7 +79,7 @@ class TimeTracker(Thread):
     @property
     def time(self):
         with mutex:
-            t = round(time()-self.__start_time-self.__pause_time-ROBOT_SLEEP_TIME,2)
+            t = round(time()-self.__start_time-self.__pause_time-Settings.ROBOT_SLEEP_TIME,2)
             if t>0:
                 return t
             else:

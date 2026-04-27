@@ -3,7 +3,7 @@
 class:
  - ModbusRobot: Class to interact with the robot modbus server.
 """
-from URModbus.config.constants import MOTS
+from URModbus.config.constants import Settings
 from pymodbus.client import ModbusTcpClient
 from threading import Thread, Lock
 
@@ -18,7 +18,7 @@ class ModbusRobot(Thread):
      - read: This function is used to read robot register, it uses mapping dictionnary to verify if it can read the register.
      - write: This function is used to write a value to a robot register, it uses mapping dictionnary to verify if it can write the register.
     """
-    __MAPPING_MOT_ADRESSES = MOTS.copy() #Private shared property
+    __MAPPING_MOT_ADRESSES = Settings.MOTS.copy() #Private shared property
     __MAPPING_ADRESSES_MOT = {value[0]:(key,value[1]) for key,value in __MAPPING_MOT_ADRESSES.items()} #private shared property
     def __init__(self,ip:str):
         """Modbus Robot class to interact with a Modbus server. 

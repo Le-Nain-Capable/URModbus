@@ -1,5 +1,5 @@
 """
-This is the config module of MITCH code base.
+This is the config module of URModbus code base.
 Editable variables are stored here
 
 List of modules: 

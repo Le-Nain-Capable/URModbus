@@ -5,7 +5,7 @@ Class:
 """
 from URModbus.core.ModbusTools import ModbusRobot
 from URModbus.core.DashTools import DashRobot
-from URModbus.config.constants import ROBOT_SLEEP_TIME
+from URModbus.config.constants import Settings
 from threading import Thread, Lock
 from time import sleep
 
@@ -86,10 +86,10 @@ class RobotController(Thread):
 
                 # Wait until bot finish previous task and start the new one put inside the register
                 while self.get_current_task() != task and self.__running:
-                    sleep(ROBOT_SLEEP_TIME/2)
+                    sleep(Settings.ROBOT_SLEEP_TIME/2)
                 self.__remove_task() #Remove the scheduled task
             else :
-                sleep(ROBOT_SLEEP_TIME)
+                sleep(Settings.ROBOT_SLEEP_TIME)
 
     def stop(self):
         self.__running = False

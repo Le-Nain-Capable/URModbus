@@ -1,5 +1,5 @@
 """
-This is the io module of MITCH code base.
+This is the io module of URModbus code base.
 IT contains IO codes to interact with the user
 
 List of modules: 
