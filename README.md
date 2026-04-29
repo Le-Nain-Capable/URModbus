@@ -1,11 +1,24 @@
-# ⚠️ Disclaimer
+# ⚠️ Disclaimers
 
+## Using this project
 This repository is part of a research project **[ANR MITCH](https://anr.fr/Projet-ANR-24-CE10-3545)**.  
 The provided code is **research-grade** and **not intended for industrial or safety‑critical deployment**.
 
+## GitHub vs GitLab
+This repository is **primarily hosted on GitHub**.
+For the moment, **pushes are mirrored to GitLab** because the project is linked to my lab environment. However, I’m not certain I’ll retain access to the lab’s GitLab after my PhD, so GitHub is the long‑term home of the project.
+
+If you need access to my laboratory GitLab instance, you can find it [here](https://gitlab.ensam.eu/explore/projects/active)
+
+### Where to contribute
+
+
+- ✅ GitHub: This is the main platform for the project. Please use it to open Pull Requests, report issues and discuss features and bugs.
+- ⚠️ GitLab: The repository is mirrored. Please do not open issues or merge requests there — [use GitHub instead](https://github.com/Le-Nain-Capable/URModbus/tree/main)
+
 ---
 
-# URModbus
+> # 🤖 URModbus
 
 **URModbus** enables external control of **Universal Robots (UR)** via the **Modbus** and **Dashboard** interfaces while keeping task logic on the robot itself.
 
