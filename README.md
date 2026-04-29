@@ -18,7 +18,7 @@ If you need access to my laboratory GitLab instance, you can find it [here](http
 
 ---
 
-> # 🤖 URModbus
+# 🤖 URModbus
 
 **URModbus** enables external control of **Universal Robots (UR)** via the **Modbus** and **Dashboard** interfaces while keeping task logic on the robot itself.
 
@@ -26,6 +26,10 @@ The core idea is simple:
 
 > ✨ _Program tasks directly on the teach pendant but manage execution and scheduling externally._
 
+## Quick Demo
+Quick demo of the capabilities
+![QuickDemo](pictures/QuickDemo.gif)
+> The script is running in `AUTO`, therefore it is currently following the associated process file.
 ---
 
 ## ✅ Tested Configurations
@@ -87,8 +91,6 @@ The core idea is simple:
 > - Proper **initial variable values**
 > - Task `0` is reserved for _idle_
 
-5. Start the program on the robot
-
 ---
 
 ### B) Code Setup
@@ -99,8 +101,10 @@ The core idea is simple:
 git clone https://github.com/Le-Nain-Capable/URModbus.git
 ```
 
-2. cd URModbus
-
+2. Navigate to it
+```
+cd URModbus
+```
 3. Install dependencies
 ```
 pip install -r requirements.txt
@@ -250,7 +254,7 @@ ordering: [1,2]
 
 ---
 
-## 🔄 Execution Modes
+## 🔄 A note on execution modes: MODE
 
 ### AUTO
 
@@ -260,11 +264,12 @@ ordering: [1,2]
 
 - Tasks must be injected dynamically by the user
 
-### AUTO_LOAD
+---
+
+## ⏳ A note on program loading mode: AUTO_LOAD
 
 - If enabled:
     - Reads the active UR program name
     - Attempts to auto-load the matching YAML file
 - Falls back to `TEST_FILE` or `PROCESS_FILE` if unavailable
 
----
