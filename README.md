@@ -178,6 +178,29 @@ sequenceDiagram
 
 ---
 
+### ⚙️ Changing Settings
+
+Settings can be configured in **3 ways**:
+
+1. **Edit defaults**  
+Modify values directly in `URModbus/config/constants.py`
+
+2. **Script arguments**  
+Override settings at runtime  
+`python3 main.py --<argument> <value>`  
+Example:  
+`python3 main.py --MODE MANUAL`
+
+3. **Module arguments**  
+Run URModbus as a module  
+`python3 -m URModbus --<argument> <value>`  
+Example:  
+`python3 -m URModbus --MODE MANUAL`
+
+> ⚠️ Command-line arguments (2 and 3) are temporary and will not be saved.
+
+---
+
 ### CB3 Docker Simulator
 
 Ensure the container exposes:
