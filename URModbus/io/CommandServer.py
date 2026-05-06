@@ -215,7 +215,7 @@ class TerminalServer(threading.Thread):
         elif cmd == "help":
             text = ["add        -     add a task to pile",
                     "clear      -     clear task pile",
-                    "gantt      -     generate a process gantt"
+                    "gantt      -     generate a process gantt",
                     "help       -     display help",
                     "info       -     display info on a task",
                     "load       -     load a new process file",
