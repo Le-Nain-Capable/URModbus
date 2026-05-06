@@ -176,6 +176,7 @@ class TerminalServer(threading.Thread):
                         "Special Parameters",
                         " <tasks_ids>: plot only requested tasks. ex 1 2 3 4",
                         " -cli: render the graph in the CLI",
+                        " -car <caracter> caracter used for a full cell in cli chart mode",
                         " -name <name>: change the graph name"]
                 return '\n'.join(text)
             if "-cli" in args:
@@ -189,7 +190,14 @@ class TerminalServer(threading.Thread):
                 args.pop(name_pos + 1)
                 args.remove("-name")
             else:
-                name = ""
+                name = ""     
+            if "-car" in args:
+                car_pos = args.index("-car")
+                car = args[car_pos + 1]
+                args.pop(car_pos + 1)
+                args.remove("-car")
+            else:
+                car = "█"
             
             if len(args) > 0: #If tasks are passed, we must look fo task validity
                 try:
@@ -209,7 +217,7 @@ class TerminalServer(threading.Thread):
                 text = plot_gantt(self.__process, tasks, name)
                 return text
             else:
-                text = cli_gantt(self.__process, tasks, name)
+                text = cli_gantt(self.__process, tasks, name, car)
                 return '\n'.join(text)
  
         elif cmd == "help":

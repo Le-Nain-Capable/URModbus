@@ -270,7 +270,7 @@ def plot_gantt(process:Process, tasks: list[int]=[], plotName:str="")->str:
     return f"Saved as {process.name}.png in ./{Settings.AUTOGEN_DIR}/{process.name}. Location: ./{Settings.AUTOGEN_DIR}/{process.name}/{process.name}.png"
 
 
-def cli_gantt(process, tasks: list[int] = [], plotName: str = "") -> list:
+def cli_gantt(process, tasks: list[int] = [], plotName: str = "", fillcar: str = "█") -> list:
     """
     Render a Gantt chart in the CLI with fixed column alignment.
 
@@ -278,6 +278,7 @@ def cli_gantt(process, tasks: list[int] = [], plotName: str = "") -> list:
         process (Process): Process to be plotted
         tasks (list[int], optional): list of tasks to plot. [] for all
         plotName (str, optional): Name of the plot
+        fillcar (str, optional): Caracter used for representing a cell of time. default to █
 
     Returns:
         list[str]: Lines to render in CLI
@@ -350,7 +351,7 @@ def cli_gantt(process, tasks: list[int] = [], plotName: str = "") -> list:
         # Fixed-width bar area
         bar_area = (
             " " * start_char +
-            "█" * duration_chars +
+            fillcar * duration_chars +
             " " * (BAR_WIDTH - start_char - duration_chars)
         )
 
@@ -365,7 +366,7 @@ def cli_gantt(process, tasks: list[int] = [], plotName: str = "") -> list:
     # ------------------------------------------------------------------
     # TOTAL row
     # ------------------------------------------------------------------
-    total_bar = "█" * BAR_WIDTH
+    total_bar = fillcar * BAR_WIDTH
     left = f"{'TOTAL':<{NAME_WIDTH}}{SEP}"
     time_marker = f"[0.0-{total_time:.1f}] ({total_time:.1f}s)"
 

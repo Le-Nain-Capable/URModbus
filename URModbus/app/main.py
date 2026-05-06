@@ -5,7 +5,7 @@ from URModbus.io.TUI import tuiPrint
 from URModbus.io.DataParser import read_data_file,build_sequence,calculate_mean_time
 from URModbus.io.CommandServer import TerminalServer
 from URModbus.config.constants import Settings
-from subprocess import Popen, PIPE
+import subprocess
 from time import sleep
 import platform
 import signal
@@ -21,7 +21,9 @@ def run():
     ############################## Pick UR5 IP Address ############################
 
     tuiPrint(['State: Locating UR5 robot IP ',"Do: looking for ip"])
-    container_check = Popen(f'docker ps --filter "name={Settings.CONTAINER}"', shell=True, stdout=PIPE)
+    container_check = subprocess.Popen(f'docker ps --filter "name={Settings.CONTAINER}"',
+                                        shell=True,
+                                        stdout=subprocess.PIPE)
     container_output = container_check.stdout.read().decode('utf-8').strip()
 
     if container_output == "":
@@ -30,15 +32,37 @@ def run():
         if platform.system().lower().startswith('win'):
             UR5_IP = 'localhost'
         else:
-            ip_command = Popen(['docker','inspect','-f','{{range.NetworkSettings.Networks}}{{.IPAddress}}{{end}}',f'{Settings.CONTAINER}'],stdout=PIPE)
+            ip_command = subprocess.Popen(['docker',
+                                           'inspect',
+                                           '-f',
+                                           '{{range.NetworkSettings.Networks}}{{.IPAddress}}{{end}}',
+                                           f'{Settings.CONTAINER}'],
+                                           stdout=subprocess.PIPE)
             UR5_IP = ip_command.stdout.read().decode('utf-8').strip()
         locally = True
-    
-    # Ping the IP address to check if it responds
-    ping_check = Popen(f'ping -c 1 {UR5_IP}', shell=True, stdout=PIPE)
-    ping_output = ping_check.stdout.read().decode('utf-8').strip()
 
-    if "1 received" in ping_output:
+    # Determine the correct ping command based on OS
+    if platform.system() == "Windows":
+        ping_command = f'ping -n 1 {UR5_IP}'
+    else:
+        ping_command = f'ping -c 1 {UR5_IP}'
+
+    try:
+        # Use subprocess.run which handles encoding and returns a Result object
+        result = subprocess.run(
+            ping_command,
+            shell=True,
+            capture_output=True, # Captures stdout and stderr
+            text=True,            # Important: Tells Python to decode output using default OS encoding
+            check=True            # Raises CalledProcessError if the command fails
+        )
+        ping_output = result.stdout.strip()
+
+    except subprocess.CalledProcessError as e:
+        tuiPrint(f"Ping failed: {e}")
+        ping_output = "" # Handle failure case gracefully
+
+    if "ms" in ping_output: #We check for a time to be present, indicating a success
         tuiPrint(['State: UR5 robot IP is reachable', 'IP responded'])
     else:
         tuiPrint(['State: UR5 robot IP is not reachable', 'IP did not respond', 'Aborting boot....'])
