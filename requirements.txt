@@ -1,3 +1,4 @@
 pymodbus
 PyYAML
 numpy
+matplotlib

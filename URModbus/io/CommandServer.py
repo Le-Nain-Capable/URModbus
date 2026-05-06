@@ -7,7 +7,7 @@ from URModbus.config.constants import Settings
 from URModbus.core.RobotController import RobotController
 from URModbus.core.ProcessTools import Process
 from URModbus.core.TimeTracker import TimeTracker
-from URModbus.io.DataParser import read_data_file,calculate_mean_time
+from URModbus.io.DataParser import read_data_file,calculate_mean_time,plot_gantt,cli_gantt
 import os
 import socket
 import threading
@@ -168,10 +168,54 @@ class TerminalServer(threading.Thread):
                            
             self.__controller.clear_task_pile()
             return "Cleared Tasks"
-        
+
+        elif cmd== "gantt":
+            if "-h" in args:
+                text = ["This command allows you to draw a gantt",
+                        "Usage: gantt <parameters>",
+                        "Special Parameters",
+                        " <tasks_ids>: plot only requested tasks. ex 1 2 3 4",
+                        " -cli: render the graph in the CLI",
+                        " -name <name>: change the graph name"]
+                return '\n'.join(text)
+            if "-cli" in args:
+                cli_flag = True
+                args.remove('-cli')
+            else:
+                cli_flag = False
+            if "-name" in args:
+                name_pos = args.index("-name")
+                name = args[name_pos + 1]
+                args.pop(name_pos + 1)
+                args.remove("-name")
+            else:
+                name = ""
+            
+            if len(args) > 0: #If tasks are passed, we must look fo task validity
+                try:
+                    tasks = [int(task.strip()) for task in args]
+                except ValueError:
+                    return "Task id must be an integer"
+            
+                if any(task < 0 for task in tasks):
+                    return "Task id must be a positive integer"
+            
+                if not all(self.__process.isTaksInProcess(task) is True for task in tasks):
+                    return "One or more tasks are not in the process file"
+            else:
+                tasks = []
+
+            if not cli_flag:
+                text = plot_gantt(self.__process, tasks, name)
+                return text
+            else:
+                text = cli_gantt(self.__process, tasks, name)
+                return '\n'.join(text)
+ 
         elif cmd == "help":
             text = ["add        -     add a task to pile",
                     "clear      -     clear task pile",
+                    "gantt      -     generate a process gantt"
                     "help       -     display help",
                     "info       -     display info on a task",
                     "load       -     load a new process file",
