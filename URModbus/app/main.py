@@ -65,19 +65,29 @@ def run():
 
     if "ms" in ping_output: #We check for a time to be present, indicating a success
         tuiPrint(['State: UR5 robot IP is reachable', 'IP responded'])
+        CONTROLLER = True
     else:
-        tuiPrint(['State: UR5 robot IP is not reachable', 'IP did not respond', 'Aborting boot....'])
-        exit()
+        tuiPrint(['State: UR5 robot IP is not reachable', 'Booting without the controller'])
+        CONTROLLER = False
+        
         
     ############################## Boot Up controller ############################
-    tuiPrint([f'State: Connecting to {UR5_IP}','Creating Controller'])
-
-    controller = RobotController(UR5_IP)
+    # IF controller we attempt to communicate to the bot
+    if CONTROLLER:    
+        tuiPrint([f'State: Connecting to {UR5_IP}','Creating Controller'])
+        controller = RobotController(UR5_IP)
+    else :
+        tuiPrint([f'State: Bypassing Controller'])
+        controller = None
 
     ############################## Process File ############################
+    #IF controller we attempt to autoload the program name
     tuiPrint([f'Reading Process File'])
+    if CONTROLLER:
+        pName = controller.programName
+    else:
+        pName = "null"
 
-    pName = controller.programName
     if pName != "null" and Settings.AUTO_LOAD: #A File is loaded on the bot if it is not null here
         pName = pName[:-4] #Removes the .urp
         tuiPrint(['Attempting to load a process file',f'file: {pName}'])
@@ -93,30 +103,43 @@ def run():
     process = Process(read_data_file(file))
 
 
+    ############################## Time tracker ############################
+    if CONTROLLER:
+        tuiPrint([f'State: Starting Time Tracker'])
+        tracker = TimeTracker(controller,process)
+        tracker.start()
+    else: 
+        tuiPrint([f'State: Bypassing Time Tracker'])
+        tracker = None
 
-    tuiPrint([f'State: Starting Time Tracker'])
-    
 
-    tracker = TimeTracker(controller,process)
-    tracker.start()
-
+    ############################## TerminalServer ############################
     tuiPrint([f'State: Starting Terminal'])
-
-
-    terminal_thread = TerminalServer(controller,tracker,process)
+    terminal_thread = TerminalServer(controller,tracker,process,degraded=not CONTROLLER) #if no controller then we must enable degraded mode
     terminal_thread.start()
 
-    tuiPrint([f'State: Starting up controller to {UR5_IP}'])
-    def signal_handler(sig, frame):
-        print('Interupting controller')
-        controller.stop()
-        terminal_thread.stop()
-        tracker.stop()
-        sys.exit(0)
+    if CONTROLLER:
+        tuiPrint([f'State: Starting up controller to {UR5_IP}'])
+        def signal_handler(sig, frame):
+            print('Interupting controller')
+            controller.stop()
+            terminal_thread.stop()
+            tracker.stop()
+            sys.exit(0)
+        controller.start()
+    else:
+        tuiPrint([f'State: Starting up terminal in minimal mode'])
+        def signal_handler(sig, frame):
+            print('Interupting controller')
+            terminal_thread.stop()
+            sys.exit(0)
 
     signal.signal(signal.SIGINT, signal_handler)
 
-    controller.start()
+    if not CONTROLLER:
+        while True: 
+            tuiPrint(["Robot was not reachable", "Booted in minimal mode", f'TUI can be accessed at {Settings.TERMINAL_HOST} - {Settings.TERMINAL_PORT}'])
+            sleep(1)
 
     if Settings.MODE == "AUTO":
         for i in range(1,4)[::-1]:

@@ -27,6 +27,7 @@ class TerminalServer(threading.Thread):
                  controller:RobotController, 
                  tracker:TimeTracker,
                  process:Process,
+                 degraded:bool=False,
                  host:str=Settings.TERMINAL_HOST, 
                  port:int=Settings.TERMINAL_PORT):
         """Innstatiate the Terminal Server
@@ -35,6 +36,7 @@ class TerminalServer(threading.Thread):
             controller (RobotController): Controller of the robot
             tracker (TimeTracker): Time Tracker
             process (Process): Process data
+            degraded (bool, optional): degraded mode of operation (no controller and no time tracker). Defaults to False
             host (str, optional): ip of the terminal. Defaults to TERMINAL_HOST.
             port (int, optional): port. Defaults to TERMINAL_PORT.
         """
@@ -45,12 +47,14 @@ class TerminalServer(threading.Thread):
         self.__controller = controller
         self.__process = process
         self.__tracker = tracker
+        self.__degraded = degraded
 
 
-        self.__welcome = (
-                    f"Welcome to UR Robot controller\n"
-                    "Use <help> to get help\n"
-                )
+        self.__welcome = ["",f"Welcome to UR Robot controller","Use <help> to get help",""]
+
+        if degraded:
+            self.__welcome += ["NOTE: Degraded mode is active",""]
+                
 
 
 
@@ -73,7 +77,7 @@ class TerminalServer(threading.Thread):
                     conn.sendall(self.__logo.encode("utf-8") + b"\n")
 
                     # 2. Send welcome/help
-                    conn.sendall(self.__welcome.encode("utf-8") + b"\n")
+                    conn.sendall('\n'.join(self.__welcome).encode("utf-8") + b"\n")
 
                     # 3. Auto status command
                     status = self.__handle_command("status",[])
@@ -141,6 +145,8 @@ class TerminalServer(threading.Thread):
                         "Special Parameters",
                         " -f: force adding a task to the pile"]
                 return '\n'.join(text)
+
+            if self.__degraded: return f"{cmd} is not avaliable in degraded mode"
             
             f_flag = False
             if "-f" in args:
@@ -174,6 +180,8 @@ class TerminalServer(threading.Thread):
                 text = ["This command allows you to clear the task pile",
                         "Usage: clear"]
                 return '\n'.join(text)
+            
+            if self.__degraded: return f"{cmd} is not avaliable in degraded mode"
                            
             self.__controller.clear_task_pile()
             return "Cleared Tasks"
@@ -295,7 +303,7 @@ class TerminalServer(threading.Thread):
             
             if os.path.exists(f"./{Settings.DATA_DIR}/{file_name}"):
                 data = read_data_file(file_name)
-                self.__controller.clear_task_pile()
+                if not self.__degraded: self.__controller.clear_task_pile()
                 self.__process.changeProcessFile(data)
                 return f"Process {file_name} loaded"
             else:
@@ -308,7 +316,7 @@ class TerminalServer(threading.Thread):
                 text = ["This command allows you to clear the pause the program execution",
                         "Usage: pause"]
                 return '\n'.join(text)
-                
+            if self.__degraded: return f"{cmd} is not avaliable in degraded mode" 
 
             self.__controller.pause_program()
             return "Bot paused"
@@ -318,6 +326,7 @@ class TerminalServer(threading.Thread):
                 text = ["This command allows you to clear the play the program execution",
                         "Usage: play"]
                 return '\n'.join(text)
+            if self.__degraded: return f"{cmd} is not avaliable in degraded mode"
             self.__controller.play_program()
             return "Bot started"
         
@@ -328,6 +337,7 @@ class TerminalServer(threading.Thread):
                         "Special Parameters",
                         " -f: force adding a sequence to the pile"]
                 return '\n'.join(text)
+            if self.__degraded: return f"{cmd} is not avaliable in degraded mode"
             
             f_flag = False
             if "-f" in args:
@@ -365,6 +375,7 @@ class TerminalServer(threading.Thread):
                 text = ["This command allows you to display information of the current program",
                         "Usage: program"]
                 return '\n'.join(text)
+            if self.__degraded: return f"{cmd} is not avaliable in degraded mode"
            
             text = [f"Name: {self.__controller.programName}"]
             return '\n'.join(text)
@@ -374,6 +385,7 @@ class TerminalServer(threading.Thread):
                 text = ["This command allows you to clear the stop the program execution",
                         "Usage: stop"]
                 return '\n'.join(text)
+            if self.__degraded: return f"{cmd} is not avaliable in degraded mode"
             self.__controller.stop_program()
             return "Bot stopped"
         
@@ -417,6 +429,7 @@ class TerminalServer(threading.Thread):
                 if not all(self.__process.isTaksInProcess(task) is True for task in tasks):
                     return "One or more tasks are not in the process file"
             else: #The user just want the current task
+                if self.__degraded: return f"You need to specify a task in degraded mode"
                 tasks = [self.__controller.get_current_task()] 
             
             L = [calculate_mean_time(self.__process.name,task) for task in tasks] #We get statistical data
@@ -450,6 +463,8 @@ class TerminalServer(threading.Thread):
                 text = ["This command allows you to obtain a status report",
                         "Usage: status"]
                 return '\n'.join(text)
+            
+            if self.__degraded: return f"{cmd} is not avaliable in degraded mode"
 
             states_dict = {0:"Disconnected",
                            1:"Confirm_safety",
