@@ -2,7 +2,8 @@
 
 Functions:
  - tuiPrint: Display a list of strings on fixed lines in the terminal, rewriting the same lines on each call.
-"""
+ - format_pile: Simple helper function to prettyfly task pile display
+ """
 from datetime import datetime
 
 def tuiPrint(lines:list) -> None:
@@ -28,3 +29,21 @@ def tuiPrint(lines:list) -> None:
 
     # Update stored line count
     tuiPrint.line_count = len(lines)
+
+def format_pile(pile:list[int])->list:
+    """Function to simplify the current task pile of the bot.
+    Tranform [0,1,0,2,0,3,0,4,0,5,0,6,0] into a pretty version
+
+    Args:
+        pile (list[int]): raw task pile
+
+    Returns:
+        list: formated task pile
+    """
+
+    pile = [i for i in pile if i != 0]
+
+    if len(pile)>6: #if more than 6 tasks
+        pile = pile[0:3] + ["..."] + pile[-3:]
+    
+    return pile

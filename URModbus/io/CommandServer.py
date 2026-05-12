@@ -123,6 +123,15 @@ class TerminalServer(threading.Thread):
         return cmd, args
 
     def __handle_command(self, cmd:str, args:list[str])->str:
+        """Simple command handling. For compatibility reason we do not use switch case
+
+        Args:
+            cmd (str): requested command
+            args (list[str]): passed args
+
+        Returns:
+            str: displayed text =
+        """
 
         
         if cmd == "add":
@@ -232,7 +241,7 @@ class TerminalServer(threading.Thread):
                     "process    -     get info on the running process",
                     "program    -     get program name",
                     "sequence   -     add a sequence to pile",
-                    "stats      -     displays statistics values"
+                    "stats      -     displays statistics values",
                     "status     -     display bot status informations",
                     "stop       -     stop current task",
                     "Pro tip: use <command> -h to obtain specific help"]
@@ -440,15 +449,22 @@ class TerminalServer(threading.Thread):
             if "-h" in args:
                 text = ["This command allows you to obtain a status report",
                         "Usage: status"]
-                return '\n'.join(text)    
+                return '\n'.join(text)
 
-                
-            
+            states_dict = {0:"Disconnected",
+                           1:"Confirm_safety",
+                           2: "Booting", 
+                           3: "Power_off",
+                           4: "Power_on",
+                           5: "Idle",
+                           6: "Backdrive",
+                           7: "Running"}
+                        
             lenght = 69
             l1 = f"Status obtained at: {datetime.now().strftime('%H:%M:%S')}"
             l2 = f"Robot IP: {self.__controller.ip}"
-            l3 = f"Emergency stop: {self.__controller.isEmergencyStopped} - False=0 True=1"
-            l4 = f"Robot status: {self.__controller.state} - Disconnected=0, Confirm_safety=1, Booting=2, Power_off=3, Power_on=4, Idle=5, Backdrive=6, Running=7"
+            l3 = f"Emergency stop: {'True' if self.__controller.isEmergencyStopped else 'False'}"
+            l4 = f"Robot status: {self.__controller.state} - {states_dict[self.__controller.state]}"
             l5 = f"Program status: {self.__controller.programState}"
             text_list = [
                 f"# {'-'*lenght} #",
@@ -460,7 +476,6 @@ class TerminalServer(threading.Thread):
                 f"# {'-'*lenght} #"
             ]
             return '\n'.join(text_list)
-            return text
 
         else:
             return "Unknown command"

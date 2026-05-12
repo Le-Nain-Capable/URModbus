@@ -1,10 +1,11 @@
 from URModbus.core.RobotController import RobotController
 from URModbus.core.TimeTracker import TimeTracker
 from URModbus.core.ProcessTools import Task,Process
-from URModbus.io.TUI import tuiPrint
-from URModbus.io.DataParser import read_data_file,build_sequence,calculate_mean_time
+from URModbus.io.TUI import tuiPrint,format_pile
+from URModbus.io.DataParser import read_data_file,calculate_mean_time
 from URModbus.io.CommandServer import TerminalServer
 from URModbus.config.constants import Settings
+
 import subprocess
 from time import sleep
 import platform
@@ -59,7 +60,7 @@ def run():
         ping_output = result.stdout.strip()
 
     except subprocess.CalledProcessError as e:
-        tuiPrint(f"Ping failed: {e}")
+        tuiPrint([f"Ping failed: {e}"])
         ping_output = "" # Handle failure case gracefully
 
     if "ms" in ping_output: #We check for a time to be present, indicating a success
@@ -126,7 +127,7 @@ def run():
         
         while controller.hasTask:
             if controller.isEmergencyStopped:
-                tuiPrint([f'Emergency Stop Detected - Please Follow safety Rules before Restoring Cycle',f"Current task: {task} - {process.get_task(task).name}",f"TaskPile: {controller.taskPile}"])
+                tuiPrint([f'Emergency Stop Detected - Please Follow safety Rules before Restoring Cycle',f"Current task: {task} - {process.get_task(task).name}",f"TaskPile: {format_pile(controller.taskPile)}"])
                 controller.clear_task_pile()
             else:
 
@@ -141,7 +142,7 @@ def run():
                 tuiPrint([f'Running Cycle - Robot: {controller.state} - Program: {controller.programState}',
                           f"Current task: {task} - {process.get_task(task).name}",
                           time_data,
-                          f"TaskPile: {controller.taskPile}"])
+                          f"TaskPile: {format_pile(controller.taskPile)}"])
         
             sleep(Settings.ROBOT_SLEEP_TIME/2)
         
