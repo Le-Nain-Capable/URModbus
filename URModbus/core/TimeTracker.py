@@ -57,13 +57,13 @@ class TimeTracker(Thread):
                     with mutex:
                         self.__end_time = time()
 
-                        t = self.__end_time-self.__start_time-self.__pause_time-(2*Settings.ROBOT_SLEEP_TIME)
+                        t = self.__end_time-self.__start_time-self.__pause_time-(2*Settings.ROBOT_SLEEP_TIME) #2 0 task between tasks
 
                         if t > 0 :
                             write_task_time(self.__process.name,
                                             last_task,
                                             self.__end_time,
-                                            t) #2 0 task between tasks
+                                            t) 
 
                         self.__pause_time = 0
                 last_task = current_task

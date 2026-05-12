@@ -7,7 +7,7 @@ from URModbus.config.constants import Settings
 from URModbus.core.RobotController import RobotController
 from URModbus.core.ProcessTools import Process
 from URModbus.core.TimeTracker import TimeTracker
-from URModbus.io.DataParser import read_data_file,calculate_mean_time,plot_gantt,cli_gantt
+from URModbus.io.DataParser import read_data_file,calculate_mean_time,plot_gantt,cli_gantt,gaussian
 import os
 import socket
 import threading
@@ -222,8 +222,8 @@ class TerminalServer(threading.Thread):
                 except ValueError:
                     return "Task id must be an integer"
             
-                if any(task < 0 for task in tasks):
-                    return "Task id must be a positive integer"
+                if any(task <= 0 for task in tasks):
+                    return "Task id must be a positive integer and not 0"
             
                 if not all(self.__process.isTaksInProcess(task) is True for task in tasks):
                     return "One or more tasks are not in the process file"
@@ -236,11 +236,48 @@ class TerminalServer(threading.Thread):
             else:
                 text = cli_gantt(self.__process, tasks, name, car)
                 return '\n'.join(text)
- 
+
+        elif cmd== "gaussian":
+            if "-h" in args:
+                text = ["This command allows you to draw a gaussian",
+                        "Usage: gaussian",
+                        "Special Parameters",
+                        " <tasks_ids>: plot only requested tasks. ex 1 2 3 4",
+                        " -name <name>: change the graph name"]
+                return '\n'.join(text)
+            
+            if "-name" in args:
+                name_pos = args.index("-name")
+                name = args[name_pos + 1]
+                args.pop(name_pos + 1)
+                args.remove("-name")
+            else:
+                name = ""   
+
+            if len(args) > 0: #If tasks are passed, we must look fo task validity
+                try:
+                    tasks = [int(task.strip()) for task in args]
+                except ValueError:
+                    return "Task id must be an integer"
+            
+                if any(task <= 0 for task in tasks):
+                    return "Task id must be a positive integer and not 0"
+            
+                if not all(self.__process.isTaksInProcess(task) is True for task in tasks):
+                    return "One or more tasks are not in the process file"
+            
+            else:
+                tasks = self.__process.tasks[1:]
+
+            text = [gaussian(self.__process, task, name) for task in tasks]
+            return '\n'.join(text)
+
+
         elif cmd == "help":
             text = ["add        -     add a task to pile",
                     "clear      -     clear task pile",
                     "gantt      -     generate a process gantt",
+                    "gaussian   -     draw a gaussian chart",
                     "help       -     display help",
                     "info       -     display info on a task",
                     "load       -     load a new process file",

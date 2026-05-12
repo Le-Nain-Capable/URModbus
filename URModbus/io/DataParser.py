@@ -15,6 +15,7 @@ import numpy as np
 import matplotlib
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
+from scipy.stats import norm
 
 
 
@@ -266,11 +267,11 @@ def plot_gantt(process:Process, tasks: list[int]=[], plotName:str="")->str:
 
     plt.tight_layout()
     
-    plt.savefig(f"./{Settings.AUTOGEN_DIR}/{process.name}/{process.name}.png")
-    return f"Saved as {process.name}.png in ./{Settings.AUTOGEN_DIR}/{process.name}. Location: ./{Settings.AUTOGEN_DIR}/{process.name}/{process.name}.png"
+    plt.savefig(f"./{Settings.AUTOGEN_DIR}/{process.name}/{process.name}.svg")
+    return f"Saved as {process.name}.png in ./{Settings.AUTOGEN_DIR}/{process.name}. Location: ./{Settings.AUTOGEN_DIR}/{process.name}/{process.name}.svg"
 
 
-def cli_gantt(process, tasks: list[int] = [], plotName: str = "", fillcar: str = "█") -> list:
+def cli_gantt(process:Process, tasks: list[int] = [], plotName: str = "", fillcar: str = "█") -> list:
     """
     Render a Gantt chart in the CLI with fixed column alignment.
 
@@ -374,4 +375,135 @@ def cli_gantt(process, tasks: list[int] = [], plotName: str = "", fillcar: str =
     text.append("=" * LINE_WIDTH)
 
     return text
+
+def gaussian(process:Process,task:int,plotName:str = "")->str:
+    """This function generates a gaussian chart of a process task, it is similar to gantt creation
+
+    Args:
+        process (Process): Process used as a reference
+        task (int): Number of the task
+        plotName (str, optional): name of the plot. Defaults to "".
+
+    Returns:
+        str: name of the saved plot
+    """
+
+    #first obtain mean and dev
+    mean,dev,_,_ = calculate_mean_time(process.name,task)
+
+    if mean == 0.0 or dev == 0.0:
+        return f"Task {task} - {process.get_task(task).name} - hold no exploitable time"
+
+    #Create the time axis from mean+/- 3 dev for >99% of case
+    x = np.linspace(mean - 3*dev, mean + 3*dev, 1000)
+    
+    # Calculate the probability density function (PDF) for the normal distribution
+    pdf = norm.pdf(x, loc=mean, scale=dev)
+    # Calculate the cumulative distribution function (CDF)
+    cdf = norm.cdf(x, loc=mean, scale=dev)
+
+    fig, axes = plt.subplots(2, 1, figsize=(10, 10)) # Create a subplot of 2 figures
+
+    #Handle user redefining the name of the plot
+    if plotName != "":
+        axes[0].set_title(plotName)
+        axes[1].set_title(plotName)
+    else:
+        axes[0].set_title(f'Task {task} Distribution PDF ({process.name})')
+        axes[1].set_title(f'Task {task} Distribution CDF ({process.name})')
+
+
+    #general settings for axis and grid 
+    axes[0].set_xlabel('Time (s)')
+    axes[0].set_ylabel('Density')
+    axes[0].grid(True, linestyle='--', alpha=0.7)
+
+    axes[1].set_xlabel('Time (s)')
+    axes[1].set_ylabel('Cumulative Probability')
+    axes[1].grid(True, linestyle='--', alpha=0.7)
+
+
+
+    # This is used to draw the color zones of the probability rules (68–95–99.7 rule) ---
+    zones = [
+        (0, 1, 'green', 0.2),
+        (1, 2, 'orange', 0.15),
+        (2, 3, 'red', 0.1),
+    ]
+
+    # This will draw the zones
+    for i in [0, 1]:
+        for start, end, color, alpha in zones:
+            axes[i].axvspan(mean - end*dev, mean - start*dev, color=color, alpha=alpha)
+            axes[i].axvspan(mean + start*dev, mean + end*dev, color=color, alpha=alpha)
+
+    # This will draw the vertical lines at special values, mark with red x
+    # and add the little text on the graph
+    for i in [0, 1]:
+        # Plot mean and standard deviation lines
+        axes[i].axvline(mean, color='red', linestyle='--', linewidth=1.5)
+
+        # Loop through multiples of standard deviation (n=-3 to n=3)
+        for n in [-3, -2, -1, 0, 1, 2, 3]:
+            val = mean + n * dev
+            axes[i].axvline(val, color='black', linestyle=':', linewidth=1.0)
+            
+            #Highlight the value
+            axes[i].plot(val, 
+                         (pdf if i == 0 else cdf)[np.searchsorted(x, val)],
+                         color='red',
+                         marker='x')
+
+            percent = (pdf if i == 0 else cdf)[np.searchsorted(x, val)]
+            # Display the value text next to the vertical line for visualization
+            axes[i].text(val + dev/10,
+                        np.max(pdf)/2 if i ==0 else 0.5,
+                        f'mean {'+' if n >=0 else '-'}{np.abs(n)}σ\n{val:.2f}s\n{(percent*100 if i==1 else percent):.2f}%',
+                        va='center',
+                        ha='left', 
+                        fontsize=8,
+                        bbox=dict(boxstyle='round', facecolor='white', alpha=0.85))
+
+    # plot the gaussian curve
+    
+    for i in [0, 1]:
+        
+        # This can happen if you have a low mean with high deviation,
+        # This is likelly a bad measurment
+        if np.min(x)<0:
+            # Dashed boundary at x = 0
+            axes[i].axvline(0, color='black', linestyle='--', linewidth=1.2)
+
+
+        #Plot the actual curves
+        mask = x < 0
+        notmask = x>0
+        axes[i].plot(x[mask], (pdf if i == 0 else cdf)[mask],
+                    linestyle='dashed', color='blue')
+        axes[i].plot(x[notmask], (pdf if i == 0 else cdf)[notmask],
+                    linestyle='solid', color='blue')
+
+
+    #annotations
+    text_str = (
+        f"Task = {task}\n"
+        f"Name = {process.get_task(task).name}\n"
+        f"Mean = {mean:.2f}s\n"
+        f"Std = {dev:.2f}s\n"
+        f"Mean ± Std = [{mean-dev:.2f}s, {mean+dev:.2f}s]"
+    )
+
+    for i in [0, 1]:
+        axes[i].text(
+            0.02, 0.95, text_str,
+            transform=axes[i].transAxes,
+            fontsize=10,
+            verticalalignment='top',
+            bbox=dict(boxstyle='round', facecolor='white', alpha=0.85)
+        )
+
+    plt.tight_layout() # Adjust layout
+    
+    plt.savefig(f"./{Settings.AUTOGEN_DIR}/{process.name}/gaussian_{task}.svg")
+    return f"Saved as gaussian_{task}.png in ./{Settings.AUTOGEN_DIR}/{process.name}. Location: ./{Settings.AUTOGEN_DIR}/{process.name}/gaussian_{task}.svg"   
 

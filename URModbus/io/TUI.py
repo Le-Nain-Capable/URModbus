@@ -44,6 +44,6 @@ def format_pile(pile:list[int])->list:
     pile = [i for i in pile if i != 0]
 
     if len(pile)>6: #if more than 6 tasks
-        pile = pile[0:3] + ["..."] + pile[-3:]
+        pile = pile[0:3] + [f'...{len(pile[3:-3])} hidden...'] + pile[-3:]
     
     return pile
