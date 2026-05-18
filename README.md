@@ -68,7 +68,7 @@ Quick demo of the capabilities
 |**DashTools.py**|Dashboard server interface|
 |**ProcessTool.py**|Loads and manages task process files|
 |**CommandServer.py**|Interactive terminal (TUI)|
-|Constants.py|Settings for the code|
+|**Constants.py**|Settings for the code|
 
 ---
 
@@ -273,3 +273,57 @@ ordering: [1,2]
     - Attempts to auto-load the matching YAML file
 - Falls back to `TEST_FILE` or `PROCESS_FILE` if unavailable
 
+---
+
+## ⚙️ A note on the TUI:
+
+### General stuff
+By default:
+- The TUI should be available at localhost:9999. **It is a pure TCP connection and not a true TUI**
+- You can establish a TCP connection to it with any tool like `nc` or any `socket` library.
+- You have to send it `str` of requested functions call with arguments. 
+
+
+**`help`** is a good way to start, as it should display all available commands. Then running `<command> -h` will get you information on how to use such command.
+
+### TCP socket connection breakdown
+The TCP will accept **only 1 connection**. 
+
+The greetings' interaction is as follows:
+```mermaid
+sequenceDiagram
+    participant TUI
+
+    participant TCP
+
+    TCP -->> TUI: Establish connection
+
+    TUI -->> TCP: Send Logo
+
+    TUI -->> TCP: Send Greetings message
+
+    TUI -->> TCP: Send Status results
+```
+
+Keep the socket open and send commands to it. Per command, you will receive a response.
+
+### Available commands.
+Here is a breakdown of commands, usage and parameters.
+
+|Command|Details|Usage|Special Parameters|Example|
+|---|---|---|---|---|
+|**add**|Add tasks to the task pile|`add <task_id>`|`-f`: force adding a task to the pile|`add 1`<br>`add -f 500`|
+|**clear**|Clear the task pile|`clear`|None|`clear`|
+|**gantt**|Draw a gantt|`gantt`|`<task(s)_id(s)>`: plot only requested tasks.<br> `-cli`: render the graph in the CLI <br> `-car <caracter>` caracter used for a full cell in cli chart mode <br> `-name <name>`: change the graph name |`gantt`<br>`gantt -cli 8 7 9`<br>`gantt -name MyGantt`| 
+|**gaussian**|Draw a gaussian|`gaussian`|`<task(s)_id(s)>`: plot only requested tasks. <br> `-name <name>`: change the graph name |`gaussian`<br>`gaussian 8 7 9`<br>`gaussian -name MyGaussian`|                       
+|**help**|Display help|`help`|None |`help`|
+|**info**|Display information on a specific task|`info <task_id>`|None |`info 1`|         
+|**load**|Load a new process file|`load <process_file_name>`|None |`load myfile`<br> `load myfile.yaml`|  
+|**pause**|Pause the program execution|`pause`|None |`pause`|           
+|**play**|Play the program execution|`play`|None |`play`| 
+|**sequence**|Add a sequence to the task pile|`sequence <tasks_ids>`|`-f`: force adding a task to the pile|`sequence 1 2 3 4 5`<br>`sequence -f 500`|           
+|**process**|Display information of the current process|`process`|None|`process`|             
+|**program**|Display information of the current program|`program`|None|`program`|
+|**stop**|Stop the program execution|`stop`|None |`stop`| 
+|**stats**|Obtain a stats report|`stats`|`<task(s)>`: request data for selected tasks<br>`-full`:whole process report<br>`-p`:only general process info |`stats`<br>`stats 1 2 3`<br>`stats -full`<br>`stats -p`|   
+|**status**|Status report|`status`|None |`status`|   

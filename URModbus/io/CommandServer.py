@@ -350,7 +350,7 @@ class TerminalServer(threading.Thread):
 
         elif cmd == "pause":
             if "-h" in args:
-                text = ["This command allows you to clear the pause the program execution",
+                text = ["This command allows you to pause the program execution",
                         "Usage: pause"]
                 return '\n'.join(text)
             if self.__degraded: return f"{cmd} is not avaliable in degraded mode" 
@@ -360,7 +360,7 @@ class TerminalServer(threading.Thread):
         
         elif cmd == "play":
             if "-h" in args:
-                text = ["This command allows you to clear the play the program execution",
+                text = ["This command allows you to play the program execution",
                         "Usage: play"]
                 return '\n'.join(text)
             if self.__degraded: return f"{cmd} is not avaliable in degraded mode"
@@ -419,7 +419,7 @@ class TerminalServer(threading.Thread):
         
         elif cmd == "stop":
             if "-h" in args:
-                text = ["This command allows you to clear the stop the program execution",
+                text = ["This command allows you to stop the program execution",
                         "Usage: stop"]
                 return '\n'.join(text)
             if self.__degraded: return f"{cmd} is not avaliable in degraded mode"
