@@ -122,6 +122,10 @@ or
 ```
 python3 -m URModbus
 ```
+or
+```
+python3 URModbus
+```
 ✅ The controller is now running.
 
 ---
