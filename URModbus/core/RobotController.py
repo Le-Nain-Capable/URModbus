@@ -102,10 +102,9 @@ class RobotController(Thread):
     def __remove_task(self):
         """Remove the first task to the pile
         """
-        mutex.acquire()
-        if len(self.__taskPile) > 0:
-            self.__taskPile.pop(0)
-        mutex.release()
+        with mutex:
+            if len(self.__taskPile) > 0:
+                self.__taskPile.pop(0)
    
 
 
@@ -177,10 +176,9 @@ class RobotController(Thread):
         if new_sequence[-1] != 0: #add 0 at the end
             new_sequence.append(0)
 
-        mutex.acquire() #We need to lock to ensure we donet asign two different sequence at the same time
-        for task in new_sequence:     
-            self.__taskPile.append(task)
-        mutex.release()
+        with mutex: #We need to lock to ensure we dont asign two different sequence at the same time
+            for task in new_sequence:     
+                self.__taskPile.append(task)
 
 
     def play_program(self):
@@ -205,10 +203,9 @@ class RobotController(Thread):
         Returns:
             List: Task Pile
         """
-        mutex.acquire()
-        task_pile = self.__taskPile
-        mutex.release()
-        return task_pile
+        with mutex:
+            task_pile = self.__taskPile
+            return task_pile
 
     @property
     def nextTask(self)->int:
@@ -219,12 +216,11 @@ class RobotController(Thread):
             int: Following task
         """
         task = None
-        mutex.acquire()
-        if len(self.__taskPile) > 0:
-            task = self.__taskPile[0]
-        
-        mutex.release()
-        return task 
+        with mutex:
+            if len(self.__taskPile) > 0:
+                task = self.__taskPile[0]
+
+            return task 
     
     @property
     def lastTask(self)->int:
@@ -234,12 +230,11 @@ class RobotController(Thread):
             int: Following task
         """
         task = None
-        mutex.acquire()
-        if len(self.__taskPile) > 0:
-            task = self.__taskPile[-1]
-        
-        mutex.release()
-        return task 
+        with mutex:
+            if len(self.__taskPile) > 0:
+                task = self.__taskPile[-1]
+            
+            return task 
 
 
     @property
@@ -249,10 +244,9 @@ class RobotController(Thread):
         Returns:
             bool: True if task in taskpile, false otherwise
         """
-        mutex.acquire()
-        l = len(self.__taskPile)
-        mutex.release()
-        return l > 0
+        with mutex:
+            l = len(self.__taskPile)
+            return l > 0
 
     @property
     def isEmergencyStopped(self)->int:

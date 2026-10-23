@@ -15,8 +15,6 @@ import os
 
 def run():
 
-    global UR5_IP
-
     print(Settings.LOGO)
 
     ############################## Pick UR5 IP Address ############################
@@ -27,11 +25,13 @@ def run():
                                         stdout=subprocess.PIPE)
     container_output = container_check.stdout.read().decode('utf-8').strip()
 
-    if container_output == "":
+    if Settings.CONTAINER not in container_output:
+        # If not, container is not running,
         locally = False
-    else:
+        
+    else: #Container is running !
         if platform.system().lower().startswith('win'):
-            UR5_IP = 'localhost'
+            Settings.UR5_IP = 'localhost'
         else:
             ip_command = subprocess.Popen(['docker',
                                            'inspect',
@@ -39,14 +39,16 @@ def run():
                                            '{{range.NetworkSettings.Networks}}{{.IPAddress}}{{end}}',
                                            f'{Settings.CONTAINER}'],
                                            stdout=subprocess.PIPE)
-            UR5_IP = ip_command.stdout.read().decode('utf-8').strip()
+            Settings.UR5_IP = ip_command.stdout.read().decode('utf-8').strip()
         locally = True
 
     # Determine the correct ping command based on OS
+    # If container is not running, this will ping docker,
+    # Esle it pings the bot
     if platform.system() == "Windows":
-        ping_command = f'ping -n 1 {UR5_IP}'
+        ping_command = f'ping -n 1 {Settings.UR5_IP}'
     else:
-        ping_command = f'ping -c 1 {UR5_IP}'
+        ping_command = f'ping -c 1 {Settings.UR5_IP}'
 
     try:
         # Use subprocess.run which handles encoding and returns a Result object
@@ -74,8 +76,8 @@ def run():
     ############################## Boot Up controller ############################
     # IF controller we attempt to communicate to the bot
     if CONTROLLER:    
-        tuiPrint([f'State: Connecting to {UR5_IP}','Creating Controller'])
-        controller = RobotController(UR5_IP)
+        tuiPrint([f'State: Connecting to {Settings.UR5_IP}','Creating Controller'])
+        controller = RobotController(Settings.UR5_IP)
     else :
         tuiPrint([f'State: Bypassing Controller'])
         controller = None
@@ -119,7 +121,7 @@ def run():
     terminal_thread.start()
 
     if CONTROLLER:
-        tuiPrint([f'State: Starting up controller to {UR5_IP}'])
+        tuiPrint([f'State: Starting up controller to {Settings.UR5_IP}'])
         def signal_handler(sig, frame):
             print('Interupting controller')
             controller.stop()
