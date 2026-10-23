@@ -2,3 +2,4 @@ pymodbus
 PyYAML
 numpy
 matplotlib
+scipy
