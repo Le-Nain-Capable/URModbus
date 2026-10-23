@@ -345,8 +345,7 @@ Here is a breakdown of commands, usage and parameters.
 The complete test suite is executed automatically on both GitHub Actions and GitLab CI/CD after each push.
 
 The test suite covers:
+- App Module Tests
 - Core Module Tests
 - Config Module Tests
 - IO Module Tests
-
-App remains to be supported !

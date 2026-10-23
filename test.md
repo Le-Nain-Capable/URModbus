@@ -6,9 +6,60 @@
 ---
 
 ## Table of Contents
+- App Module Tests
 - Core Module Tests
 - Config Module Tests
 - IO Module Tests
+
+---
+
+## App Module Tests (`tests/app/`)
+
+### 1. `test_main.py`
+**Module:** `URModbus/app/main.py`
+
+**Test Classes:**
+
+- **TestAppRunInitialization**
+  - `test_run_prints_logo`
+  - `test_run_detects_local_vs_remote`
+
+- **TestAppRunWithoutController**
+  - `test_run_without_controller_uses_degraded_mode`
+
+- **TestAppRunWithController**
+  - `test_run_with_controller_uses_full_mode`
+
+- **TestAppRunProcessLoading**
+  - `test_run_autoload_process_from_controller`
+  - `test_run_fallback_to_test_file_when_no_controller`
+
+- **TestAppRunTerminalServer**
+  - `test_run_starts_terminal_server`
+
+- **TestAppRunSignalHandlers**
+  - `test_run_sets_signal_handler_with_controller`
+  - `test_run_sets_signal_handler_without_controller`
+
+- **TestAppRunAutoMode**
+  - `test_run_auto_mode_prints_start_sequence`
+  - `test_run_auto_mode_uses_process_ordering`
+
+- **TestAppRunTaskExecution**
+  - `test_run_handles_task_execution`
+
+- **TestAppRunEmergencyStop**
+  - `test_run_handles_emergency_stop`
+
+**Key Features:**
+- Controller available and degraded-mode startup paths
+- Docker/container detection logic
+- Automatic process loading behavior
+- TerminalServer initialization verification
+- Signal handler registration
+- AUTO mode execution flow
+- Emergency stop handling
+- Startup banner and console output validation
 
 ---
 

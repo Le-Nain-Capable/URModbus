@@ -152,6 +152,7 @@ def run():
         
         while controller.hasTask:
             if controller.isEmergencyStopped:
+                task = controller.get_current_task()
                 tuiPrint([f'Emergency Stop Detected - Please Follow safety Rules before Restoring Cycle',f"Current task: {task} - {process.get_task(task).name}",f"TaskPile: {format_pile(controller.taskPile)}"])
                 controller.clear_task_pile()
             else:
