@@ -29,7 +29,7 @@ def read_data_file(file:str)->dict:
         dict: the file data
     """
     # Open the YAML file for reading
-    with open(f"./{Settings.DATA_DIR}/{file}", 'r') as stream:
+    with open(f"{Settings.DATA_DIR}/{file}", 'r') as stream:
         try:
             # Load the data from the YAML file into a Python dictionary
             data = yaml.safe_load(stream)
@@ -68,7 +68,7 @@ def write_task_time(process:str,task:int,dataID:float,time:float):
         time (float): time of the task
     """
     # Check if the directory exists
-    dir_path = f"./{Settings.AUTOGEN_DIR}/{process}"
+    dir_path = f"{Settings.AUTOGEN_DIR}/{process}"
     if not os.path.exists(dir_path):
         # Create the directory
         os.makedirs(dir_path)
@@ -101,7 +101,7 @@ def calculate_mean_time(process:str,task:int)->list[float]:
 
     # Read the file
     try:
-        data = np.loadtxt(f"./{Settings.AUTOGEN_DIR}/{process}/{task}.txt", delimiter=';')
+        data = np.loadtxt(f"{Settings.AUTOGEN_DIR}/{process}/{task}.txt", delimiter=';')
     except FileNotFoundError:
         return [0]*4
     
@@ -266,9 +266,13 @@ def plot_gantt(process:Process, tasks: list[int]=[], plotName:str="")->str:
     ax.grid(axis="x", linestyle="--", alpha=0.4)
 
     plt.tight_layout()
-    
-    plt.savefig(f"./{Settings.AUTOGEN_DIR}/{process.name}/{process.name}.svg")
-    return f"Saved as {process.name}.png in ./{Settings.AUTOGEN_DIR}/{process.name}. Location: ./{Settings.AUTOGEN_DIR}/{process.name}/{process.name}.svg"
+
+    os.makedirs(
+    f"{Settings.AUTOGEN_DIR}/{process.name}",
+    exist_ok=True,
+    )
+    plt.savefig(f"{Settings.AUTOGEN_DIR}/{process.name}/{process.name}.svg")
+    return f"Saved as {process.name}.png in {Settings.AUTOGEN_DIR}/{process.name}. Location: {Settings.AUTOGEN_DIR}/{process.name}/{process.name}.svg"
 
 
 def cli_gantt(process:Process, tasks: list[int] = [], plotName: str = "", fillcar: str = "█") -> list:
@@ -503,7 +507,11 @@ def gaussian(process:Process,task:int,plotName:str = "")->str:
         )
 
     plt.tight_layout() # Adjust layout
-    
-    plt.savefig(f"./{Settings.AUTOGEN_DIR}/{process.name}/gaussian_{task}.svg")
-    return f"Saved as gaussian_{task}.png in ./{Settings.AUTOGEN_DIR}/{process.name}. Location: ./{Settings.AUTOGEN_DIR}/{process.name}/gaussian_{task}.svg"   
+
+    os.makedirs(
+        f"{Settings.AUTOGEN_DIR}/{process.name}",
+        exist_ok=True,
+        )
+    plt.savefig(f"{Settings.AUTOGEN_DIR}/{process.name}/gaussian_{task}.svg")
+    return f"Saved as gaussian_{task}.png in {Settings.AUTOGEN_DIR}/{process.name}. Location: {Settings.AUTOGEN_DIR}/{process.name}/gaussian_{task}.svg"   
 

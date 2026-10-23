@@ -2,17 +2,36 @@
 
 import argparse
 from URModbus.config.constants import Settings
+from URModbus.config.parser import parse_Settings
+
+
 from time import sleep
 
 def main():
     parser = argparse.ArgumentParser(description="URModbus")
     # Add arguments for every attribute in the Settings class
-    for attr_name in dir(Settings):
-        # Skip private/internal attributes and non-settings constants if necessary,
-        # but for simplicity, we'll add an argument for everything found.
-        if not callable(getattr(Settings, attr_name)) and '__' not in attr_name:
-            parser.add_argument(f'--{attr_name}', type=str, help=f'Setting value for {attr_name}.')
-   
+    setting_names = [
+        attr
+        for attr in dir(Settings)
+        if not callable(getattr(Settings, attr))
+        and not attr.startswith("_")
+    ]
+
+    SETTINGS_META = parse_Settings()
+
+    for setting_name, meta in SETTINGS_META.items():
+
+        help_text = meta["description"]
+
+        if "default" in meta:
+            help_text += f" (default: {meta['default']})"
+
+        parser.add_argument(
+            f"--{setting_name}",
+            type=str,
+            default=None,   # ne modifie rien si l'option n'est pas passée
+            help=help_text,
+        )
    
     args = parser.parse_args()
     update_result = []

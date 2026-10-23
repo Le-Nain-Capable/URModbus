@@ -91,7 +91,7 @@ def run():
     if pName != "null" and Settings.AUTO_LOAD: #A File is loaded on the bot if it is not null here
         pName = pName[:-4] #Removes the .urp
         tuiPrint(['Attempting to load a process file',f'file: {pName}'])
-        if os.path.exists(f"./{Settings.DATA_DIR}/{pName}.yaml"):
+        if os.path.exists(f"{Settings.DATA_DIR}/{pName}.yaml"):
             tuiPrint(['Reading Process File'])
             file = pName + ".yaml"
         else:

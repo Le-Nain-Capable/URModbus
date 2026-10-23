@@ -42,12 +42,11 @@ class ModbusRobot(Thread):
         Returns:
             int: value read
         """
-        mutex.acquire()
-        self.__client.connect()
-        value = self.__client.read_holding_registers(address=address, count=count).registers[0]
-        self.__client.close()
-        mutex.release()
-        return value
+        with mutex:
+            self.__client.connect()
+            value = self.__client.read_holding_registers(address=address, count=count).registers[0]
+            self.__client.close()
+            return value
     
     def __write_reg(self,address:int,value:int) -> bool:
         """Write wrapper, add connection and disconection to the robot
@@ -59,12 +58,11 @@ class ModbusRobot(Thread):
         Returns:
             bool: True if the write was successful, False otherwise.
         """
-        mutex.acquire()
-        self.__client.connect()
-        self.__client.write_register(address=address,value=value)
-        self.__client.close()
-        mutex.release()
-        return True
+        with mutex:
+            self.__client.connect()
+            self.__client.write_register(address=address,value=value)
+            self.__client.close()
+            return True
 
     def read(self,register:int | str) -> int:
         """This function is used to read robot register, it uses mapping dictionnary to verify if it can read the register.

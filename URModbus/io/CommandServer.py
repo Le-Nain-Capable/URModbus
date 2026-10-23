@@ -338,7 +338,7 @@ class TerminalServer(threading.Thread):
             if ".yaml" not in file_name:
                 file_name = file_name + ".yaml"
             
-            if os.path.exists(f"./{Settings.DATA_DIR}/{file_name}"):
+            if os.path.exists(f"{Settings.DATA_DIR}/{file_name}"):
                 data = read_data_file(file_name)
                 if not self.__degraded: self.__controller.clear_task_pile()
                 self.__process.changeProcessFile(data)
