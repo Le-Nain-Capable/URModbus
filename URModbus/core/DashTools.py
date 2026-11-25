@@ -28,7 +28,7 @@ class DashRobot(Thread):
         - programState: Get the current state of the robot
         - programNAme: Get the current program name
         """
-    def __init__(self, ip, port=29999, timeout: float = 2.0):
+    def __init__(self, ip, port=29999, timeout: float = 10):
         """Dash Robot class to interact with a Dashboard server. 
         It's a simple implentation to match my needs.
 

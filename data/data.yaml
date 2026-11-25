@@ -1,76 +1,43 @@
 version: 0
-name: PJE
+name: MITCH
 tasks:
     0:
         name: Intermediate
         requires: 
     1:
-        name: Prendre Corps
+        name: Reach, grasp and place body
         requires: 0
     2: 
-        name: Poser Corps
-        requires: 1
+        name: Reach, grasp and place back plate
+        requires: 0
     3:
-        name: Prendre Culasse Arr
-        requires: 0
+        name: Assembly body and back plate
+        requires: [1,2]
     4:
-        name: Poser Culasse Arr
-        requires: 1
+        name: Reach and position back screws
+        requires: 2
     5:
-        name: Prendre Vis
-        requires: 0
+        name: Screw back screws
+        requires: [1,2,3,4]
     6:
-        name: Placer Vis
-        requires: 1
+        name: Reach and grasp rod
+        requires: 0
     7:
-        name: Prendre Vis
+        name: Reach and grasp front plate
         requires: 0
     8:
-        name: Placer Vis
-        requires: 1
+        name: Fit rod and back plate
+        requires: [6,7]
     9:
-        name: Prendre Assemblage
-        requires: 0
+        name: Fit assembly 5 and 8
+        requires: [1,2,3,4,5,6,7,8]
     10:
-        name: Poser Assemblage
-        requires: 1
+        name: Reach and position front screws
+        requires: [1,2,3,4,5,6,7,8,9]
     11:
-        name: Prendre Piston
-        requires: 0
+        name: Screw front screws
+        requires: [1,2,3,4,5,6,7,8,9,10]
     12:
-        name: Poser Piston
-        requires: 1
-    13:
-        name: Prendre Culasse Av
-        requires: 0
-    14:
-        name: Poser Culasse Ar
-        requires: 1
-    15:
-        name: Prendre Assemblage
-        requires: 0
-    16:
-        name: Poser Assemblage
-        requires: 1
-    17:
-        name: Inserer Piston
-        requires: 0
-    18:
-        name: Prendre Vis
-        requires: 0
-    19:
-        name: Placer Vis
-        requires: 1
-    20:
-        name: Prendre Vis
-        requires: 0
-    21:
-        name: Placer Vis
-        requires: 1
-    22:
-        name: Prendre Assemblage
-        requires: 0
-    23:
-        name: Poser Assemblage
-        requires: 1
-ordering: [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23]
+        name: Evacuate
+        requires: [1,2,3,4,5,6,7,8,9,10,11]
+ordering: [1,2,3,4,5,6,7,8,9,10,11,12]

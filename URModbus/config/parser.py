@@ -73,7 +73,8 @@ def parse_Settings()->Dict:
                 else: defval = setting_type(default)
                 parsed_results[setting] = {"type": setting_type,
                                            "default": defval,
-                                           "description":comment}
+                                           "description":comment,
+                                           "section":section}
 
             relevant_text = []
             continue
